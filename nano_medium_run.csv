@@ -1,0 +1,19 @@
+﻿#,Record time,Description,Date,Log,Contributors
+1,5.8 hours,llm.c baseline (350M parameters),5/28/24,log,"@karpathy, llm.c contributors"
+2,29.3 minutes,Initial record based on scaling up the GPT-2 small track speedrun,1/18/25,log,@kellerjordan0
+3,28.1 minutes,Added standard weight decay,2/8/25,log,@kellerjordan0
+4,27.7 minutes,Tuned Muon Newton-Schulz coefficients,2/14/25,log,@leloykun
+5,27.2 minutes,Increased learning rate cooldown phase duration,3/6/25,log,@YouJiacheng
+6,25.95 minutes*,"2x MLP wd, qkv norm, all_reduce/opt.step() overlap, optimized skip pattern",3/25/25,log,@YouJiacheng
+7,25.29 minutes,Remove FP8 head; ISRU logits softcap; New sharded mixed precision Muon; merge weights,4/16/25,log,@YouJiacheng
+8,24.50 minutes,"Cubic sliding window size schedule, 2× max window size (24.84 minutes) 24.5min repro",4/22/25,log,@jadenj3o
+9,24.12 minutes,Add two value embeddings,8/28/25,"log, PR",@snimu
+10,24.07 minutes,Second input embedding,9/11/25,"log, PR",@snimu
+11,23.45 minutes,Upgrade from torch 2.7 to torch==2.10.0.dev20251210+cu126,-,-,-
+12,23.28 minutes,Snoo Optimizer (Outer optimizer around Adam and Muon),9/16/25,"log,PR",@dominikkallusky
+13,23.14 minutes,EMA Wrapper on Muon,9/17/25,"log,PR",@acutkosky
+14,23.08 minutes,Combine both records 12 & 13,9/30/25,"log,PR",@acutkosky
+15,23.03 minutes,Backout (Skip from 2/3 point to pre-lm_head),10/4/25,"log,PR",@snimu
+16,22.99 minutes,Smear-MTP,11/2/25,"log,PR",@snimu
+17,22.98 minutes,Remove Redundant Mask Op,11/12/25,"log,PR",@manikbhandari
+18,17.35 minutes,Bulk transfer short track features,12/31/25,"log,PR",-

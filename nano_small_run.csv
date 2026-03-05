@@ -1,0 +1,76 @@
+﻿1,45 minutes,llm.c baseline,5/28/24,log,"@karpathy, llm.c contributors"
+2,31.4 minutes,Tuned learning rate & rotary embeddings,6/6/24,log,@kellerjordan0
+3,24.9 minutes,Introduced the Muon optimizer,10/4/24,none,"@kellerjordan0, @jxbz"
+4,22.3 minutes,Muon improvements,10/11/24,log,"@kellerjordan0, @bozavlado"
+5,15.2 minutes,"Pad embeddings, ReLU², zero-init projections, QK-norm",10/14/24,log,"@Grad62304977, @kellerjordan0"
+6,13.1 minutes,Distributed the overhead of Muon,10/18/24,log,@kellerjordan0
+7,12.0 minutes,Upgraded PyTorch 2.5.0,10/18/24,log,@kellerjordan0
+8,10.8 minutes,Untied embedding and head,11/3/24,log,"@Grad62304977, @kellerjordan0"
+9,8.2 minutes,"Value and embedding skip connections, momentum warmup, logit softcap",11/6/24,log,"@Grad62304977, @kellerjordan0"
+10,7.8 minutes,Bfloat16 activations,11/8/24,log,@kellerjordan0
+11,7.2 minutes,U-net pattern skip connections & double lr,11/10/24,log,@brendanh0gan
+12,5.03 minutes,1024-ctx dense causal attention → 64K-ctx FlexAttention,11/19/24,log,@KoszarskyB
+13,4.66 minutes,Attention window warmup,11/24/24,log,@fernbear.bsky.social
+14,4.41 minutes,Value Embeddings,12/4/24,log,@KoszarskyB
+15,3.95 minutes,"U-net pattern value embeddings, assorted code optimizations",12/8/24,log,"@leloykun, @YouJiacheng"
+16,3.80 minutes,"Split value embeddings, block sliding window, separate block mask",12/10/24,log,@YouJiacheng
+17,3.57 minutes,"Sparsify value embeddings, improve rotary embeddings, drop an attn layer",12/17/24,log,@YouJiacheng
+18,3.4 minutes,Lower logit softcap from 30 to 15,1/4/25,log,@KoszarskyB
+19,3.142 minutes,"FP8 head, offset logits, lr decay to 0.1 instead of 0.0",1/13/25,log,@YouJiacheng
+20,2.992 minutes,"Merged QKV weights, long-short attention, attention scale, lower Adam epsilon, batched Muon",1/16/25,log,"@leloykun, @fernbear.bsky.social, @YouJiacheng, @brendanh0gan, @scottjmaddox, @Grad62304977"
+21,2.933 minutes,Reduced batch size,1/26/25,log,@leloykun
+21,2.997 minutes,21st record with new timing,2/1/25,log,"not a new record, just re-timing #21 with the updated rules"
+21,3.014 minutes,21st record with latest torch,5/24/25,log,"not a new record, just re-timing #21 with latest torch"
+22,2.990 minutes,Faster gradient all-reduce,5/24/25,log,"@KonstantinWilleke, @alexrgilbert, @adricarda, @tuttyfrutyee, @vdlad; The Enigma project"
+23,2.979 minutes,Overlap computation and gradient communication,5/25/25,log,@ryanyang0
+24,2.966 minutes,Replace gradient all_reduce with reduce_scatter,5/30/25,log,@vagrawal
+25,2.896 minutes,Upgrade PyTorch to 2.9.0.dev20250713+cu126,7/13/25,log,@kellerjordan0
+26,2.863 minutes,"Align training batch starts with EoS, increase cooldown frac to .45",7/13/25,log,@classiclarryd
+27,2.817 minutes,Transpose one of the MLP matrices + add Triton kernel for symmetric matmul,7/18/25,"log,PR",@byronxu99
+28,2.812 minutes,Sparse attention gate,8/23/25,"log,PR",@classiclarryd
+29,2.731 minutes,"Flash Attention 3, 2048 max_doc_len, update ws schedule",9/3/25,"log,PR",@varunneal
+30,2.717 minutes,Drop first MLP layer,9/5/25,"log,PR",@EmelyanenkoK
+31,2.656 minutes,Dynamically incorporate YaRN during training and validation,9/10/25,"log,PR",@classiclarryd
+32,2.625 minutes,"Optimize distributed training, improve skip connection gating, and enhance bfloat16 usage",9/11/25,"log,PR",@bernard24 & AI system hiverge.ai
+33,2.565 minutes,"Asynchronously fetch and index data batches, extend final layer attention window for validation",9/15/25,"log,PR",@classiclarryd
+34,2.547 minutes,Smear token embeddings 1 position forward,9/18/25,"log,PR",@classiclarryd
+35,2.527 minutes,"Drop first attn layer, extend all long windows for validation, update schedule",9/21/25,"log,PR",@classiclarryd
+36,2.495 minutes,"MuonCustomSizing, perform mlp and attn reduce scatter in shared call",9/23/25,"log,PR",@classiclarryd
+37,2.483 minutes,Compute cross entropy in BF16 during training,9/27/25,"log,PR",@Gusarich
+38,2.476 minutes,"Polar Express, replacement for Newton-Schulz",9/29/25,"log,PR",@varunneal
+39,2.447 minutes,"Only update Adam params every other step, reduce batch size",9/30/25,"log,PR",@classiclarryd
+40,2.358 minutes,"Backout, misc hyperparameter tuning, optimize lambda padding",10/4/25,"log,PR",@classiclarryd
+41,2.345 minutes,NorMuon,10/24/25,"log,PR",@li_zichong
+42,2.313 minutes,"Update NorMuon LR, Step Logic",10/27/25,"log,PR",@varunneal
+43,2.284 minutes,Cautious Weight Decay w/ schedule,11/10/25,"log,PR",@varunneal
+44,2.269 minutes,"Backward hooks on Adam, Profiling 101",11/16/25,"log,PR",@akash5474
+45,2.248 minutes,"Refine skip arch, update exponential decay init",11/18/25,"log,PR",@classiclarryd
+46,2.203 minutes,Batch size schedule,11/29/25,"log,PR",@varunneal
+47,2.193 minutes,"Multiply attn lambda with weight instead of data, fix warmup",12/10/25,"log,PR",@roeeshenberg
+48,2.170 minutes,"Speed up Muon, additional pre-multiply lambda, reshape matrices, update lr, update NorMuon axis",12/11/25,"log,PR",@ChrisJMcCormick
+49,2.146 minutes,Partial Key Offset,12/14/25,"log,PR",@classiclarryd
+50,2.128 minutes,Extend Cautious Weight Decay to Adam parameters,12/18/25,"log,PR",@roeeshenberg
+51,2.075 minutes,"Retie Embed to lm_head, retune fp8 scales",12/19/25,"log,PR",@varunneal
+52,2.037 minutes,"Smooth scalars via beta increase, decrease smear gate lr, freeze scalars during transitions, adam all reduce",12/21/25,"log,PR",@ChrisJMcCormick
+53,1.988 minutes,"Multi-token prediction, untie embed/lm_head at 2/3 training, lr update, tweak CWD",12/22/25,"log,PR","@varunneal, feat. @classiclarryd"
+54,1.940 minutes,Asymmetric Logit Rescale,12/26/25,"log,PR",@classiclarryd
+55,1.918 minutes,Gates on value embeds and skip connection,12/29/25,"log,PR",@classiclarryd
+56,1.894 minutes,"Optimize and compile Adam, increase Adam buffer precision, move gates from Muon to Adam parameter banks",12/31/25,"log,PR",@ChrisJMcCormick
+57,1.878 minutes,"Bfloat16 attn/mlp weights, mixed precision Muon, interweave Adam/Muon, finer-grain Adam beta",1/4/26,"log,PR","@classiclarryd, feat. @YouJiacheng, @ChrisJMcCormick"
+58,1.820 minutes,Paired Head Attention,1/7/26,"log,PR",@classiclarryd
+59,1.781 minutes,Fused triton kernel for linear relu square MLP step,1/10/26,"log,PR","@andrewbriand8, @Joshrav21"
+60,1.765 minutes,Fused triton kernel for softcapped multi-token prediction cross entropy step,1/16/26,"log,PR",@soren_dunn_ & AI System Locus
+61,1.748 minutes,Unified Optimizers and Transposed LM Head,1/18/26,"log,PR",@ChrisJMcCormick
+62,1.655 minutes,Bigram Hash Embedding,1/19/26,"log,PR",@classiclarryd
+63,1.650 minutes,Untie Value Embeds,1/26/26,"log,PR",@photon_mz
+64,1.630 minutes,Tuned nonzero Attn V and O init,1/30/26,"log,PR",@srashedll
+65,1.613 minutes,Group Value Embeds into single parameter,1/30/26,"log,PR",@varunneal
+66,1.595 minutes,Torch 2.10,1/31/26,-,-
+67,1.540 minutes,Tune fused softcap kernels and fuse fp8 quantization in LM head,1/31/26,"log,PR",@andrewbriand8
+68,1.535 minutes,Move bigram hash to GPU,1/31/26,"log,PR",@dhrvji
+69,1.528 minutes,Kernel Optimizations,2/2/26,"log,PR",@EmmettBicker & AI System Aster
+70,1.521 minutes,Tune value embed layout and ve_gates,2/3/26,"log,PR",@photon_mz
+71,1.516 minutes,Sparse bigram gradient comms and optimized loading on CPU,2/6/26,"log,PR",@roeeshenberg
+72,1.496 minutes,Increase minimum lr and add max_seq_len schedule,2/10/26,"log,PR",@dualverse-ai & AI System Station
+73,1.485 minutes,Partitioned Hyperconnections,2/12/26,"log,PR",@sisovicm
+74,1.468 minutes,"Flattened GPT forward, removed post attention lambdas, added transpose kernels",2/16/26,"log,PR",@ChrisJMcCormick
