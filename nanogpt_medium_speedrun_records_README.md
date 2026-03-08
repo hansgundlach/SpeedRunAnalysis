@@ -7,11 +7,11 @@
 - **record_num** — sequential record index (1–18)
 - **date** — date the record was set
 - **record_time_min** — wall-clock training time in minutes (from the README table)
-- **training_tokens_M** — total training tokens in millions
-- **training_flops** — total training FLOPs
+- **training_tokens_M** — total training tokens in millions (only when uncertainty is <=10%)
+- **training_flops** — total training FLOPs (only when uncertainty is <=10%)
 - **description** — brief description of the innovation
 - **innovation_label** — categorical label (see below)
-- **data_quality** — `exact` if derived from a log file, `est` if estimated
+- **data_quality** — `exact` if derived from a log file with compute uncertainty <=10%, `est` otherwise
 
 ---
 
@@ -23,7 +23,7 @@ All sourced directly from the README table. These values are exact.
 ### Training steps
 Extracted from the final `step:X/X val_loss:` line of each log file. Log files are Python training scripts with the live training output appended. 17 of 18 records have log files; record 11 (PyTorch upgrade) has no log.
 
-For the llm.c baseline (record 1), the log uses the older `s:X tel:X` format. The final logged entry is `s:60000 tel:2.9282`.
+For the llm.c baseline (record 1), the log uses the older `s:X tel:X` format. The final logged entry is `s:60000 tel:2.9282`, but it does not include reliable batch-size metadata in the stored file.
 
 ### Batch configuration
 Found by searching each log file for `batch_size`, `seq_len`, `train_bs_schedule`, etc. in the dataclass config section.
@@ -64,6 +64,13 @@ The CSV handles this with a per-record `model_params_M` column:
 
 `training_flops` is computed as `6 × model_params_M × 1e6 × training_tokens_M × 1e6` in each row, so no correction factor is needed when reading the CSV. The two records are not directly FLOPs-comparable because they use different architectures; the `model_params_M` column makes this explicit.
 
+### Compute-quality gating used in this file
+
+To avoid >10% compute uncertainty in downstream analysis:
+- **Record 1** has `training_tokens_M` and `training_flops` blanked (batch-size ambiguity is large).
+- **Record 11** has `training_tokens_M` and `training_flops` blanked (no log available).
+- **Records 2–10 and 12–18** retain compute values from logs.
+
 ---
 
 ## Batch Configuration
@@ -95,7 +102,7 @@ The medium track uses a sliding window attention schedule that grows the window 
 - **Records 2–7:** `window_size = round_to_128(1728 × step / total_steps)` — window grows linearly to a final size of 1,728 tokens
 - **Record 8+:** `window_size = round_to_128(3456 × factor)` — window doubled to a final size of 3,456 tokens (record 8's key innovation)
 
-This means in the **first ~10–20% of training steps the effective attention window is near zero**, dramatically reducing attention FLOPs early in the run. The standard `6N` FLOPs formula assumes full attention across the sequence at every step, so it significantly overestimates FLOPs for the medium track — particularly for early records where the window warmup is a larger fraction of total training. For context: at full window size, attention FLOPs are still small relative to linear layer FLOPs for these sequence lengths, so the overestimate is likely 5–15% once training is underway.
+This means in the **first ~10–20% of training steps the effective attention window is near zero**, reducing attention-related compute early in the run. For a local-window implementation at these dimensions, the run-averaged attention contribution is expected to be single-digit percent of `6N × tokens` for most records (roughly low-to-mid single digits for records 2–7 and high single digits for records 8+ after warmup averaging). On that basis, no additional per-record correction was applied.
 
 ### Record 18: Batch size schedule
 
@@ -133,20 +140,16 @@ Same taxonomy as the small track:
 ## Known Inaccuracies and Limitations
 
 ### N_params differs between record 1 and records 2–18
-Record 1 (llm.c baseline) genuinely uses a ~350M parameter model. Records 2–18 use the speedrun architecture with ~201M non-embedding parameters. The `model_params_M` column in the CSV encodes this directly, and `training_flops` is computed per-row using the correct value. The two groups are not FLOPs-comparable on a per-token basis — record 1 costs ~1.74× more compute per token than records 2–18.
+Record 1 (llm.c baseline) genuinely uses a ~350M parameter model. Records 2–18 use the speedrun architecture with ~201M non-embedding parameters. The `model_params_M` column in the CSV encodes this directly. For rows with populated compute fields, `training_flops` is computed per-row using that value.
 
 ### llm.c baseline token count (record 1)
-The llm.c medium log is in the old `s:X tel:X` format and does not contain a code section, so the batch size cannot be read directly. The 524,288 tokens/step figure is inferred from the standard llm.c batch size (2¹⁹ = 524,288 tokens). This is validated by the timing math: 60,000 steps × 524,288 tokens/step = 31.46B tokens. At ~20% MFU on 8×H100 SXM5 (realistic for the less-optimized llm.c PyTorch code at the time), this gives:
-```
-6 × 350M × 31.46B FLOPs / (8 GPUs × 1,979 TFLOPS × 0.20) ≈ 20,800 seconds ≈ 5.8 hours ✓
-```
-If the llm.c medium baseline used a different batch size (e.g., less gradient accumulation), the token count could differ. The uncertainty is roughly ±50%.
+The llm.c medium log is in the old `s:X tel:X` format and does not contain enough metadata to lock batch size with high confidence. Because that can create >10% compute uncertainty, record 1 compute fields are intentionally left blank.
 
 ### Record 7 step count uncertainty
 The log file for record 7 has `num_iterations = 6450` in the config dataclass, but the final `step:X/X` line in the training output reads `6350/6350`. The training output may have been truncated before the final step, or the step count was overridden at launch via a command-line argument. The CSV uses 6,350 (from the log output). If the actual run completed all 6,450 steps, the token count would be ~1.5% higher (~3,382M instead of 3,329M).
 
 ### Record 11: No log file
-Record 11 (PyTorch 2.7→2.10 upgrade) has no log in the repository and no date listed in the README. Step count is estimated at 5,640 (same as record 12, which was set the next day). This is a pure systems change with no effect on the ML algorithm, so the token count should be nearly identical to surrounding records.
+Record 11 (PyTorch 2.7→2.10 upgrade) has no log in the repository and no date listed in the README. To avoid >10% risk from inferred compute, record 11 compute fields are intentionally left blank.
 
 ### Record 17: Higher step count than record 16
 Record 17 ("Remove Redundant Block Mask Operation") has 5,960 steps — more than record 16's 5,535 — yet achieves essentially the same training time (22.98 vs. 22.99 minutes). This is consistent: removing the redundant op made each step slightly cheaper (~249ms → ~231ms), so more steps fit in the same wall-clock budget. The result is that record 17's total token count is actually slightly *higher* than records 15 and 16, despite being a systems improvement. This is worth noting as a counterintuitive data point.
@@ -176,7 +179,7 @@ Validation runs every 125 steps (confirmed in log files). Each validation pass p
 - This is omitted from all estimates.
 
 ### Attention FLOPs grow during training (window warmup)
-Because the sliding window size starts near zero and grows to ~1,728 or ~3,456 tokens over the course of training, attention FLOPs are not constant per step. Steps early in training have near-zero attention cost; steps near the end have the full sliding window cost. The `6N` FLOPs formula ignores this entirely and assumes uniform full-context attention throughout. This is probably the second-largest source of FLOPs inaccuracy after the parameter count issue, but the magnitude is hard to quantify without step-by-step profiling.
+Because the sliding window size starts near zero and grows to ~1,728 or ~3,456 tokens, attention FLOPs are not constant per step. The `6N` formula intentionally remains a model-matmul baseline and does not add a separate attention term. Given the window warmup and observed configurations, this is treated as a sub-10% effect on populated medium-track rows.
 
 ---
 

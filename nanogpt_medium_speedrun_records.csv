@@ -1,0 +1,19 @@
+record_num,date,record_time_min,model_params_M,training_tokens_M,training_flops,description,innovation_label,data_quality
+1,2024-05-28,348,350,,,llm.c baseline (350M parameters),Systems,est
+2,2025-01-18,29.3,201,3932.2,4.742e+18,Scale up GPT-2 small speedrun to medium,Other,exact
+3,2025-02-08,28.1,201,3748.7,4.521e+18,Standard weight decay,Optimizer,exact
+4,2025-02-14,27.7,201,3696.2,4.458e+18,Tuned Muon Newton-Schulz coefficients,Optimizer,exact
+5,2025-03-06,27.2,201,3643.8,4.394e+18,Increased LR cooldown phase duration,Optimizer,exact
+6,2025-03-25,25.95,201,3381.7,4.078e+18,"2x MLP weight decay, QKV norm, all_reduce overlap, optimized skip pattern",Architecture,exact
+7,2025-04-16,25.29,201,3329.2,4.015e+18,Remove FP8 head; ISRU logit softcap; sharded mixed-precision Muon; merge weights,Architecture,exact
+8,2025-04-22,24.50,201,3124.8,3.769e+18,"Cubic sliding window schedule, 2x max window size",Architecture,exact
+9,2025-08-28,24.12,201,3051.4,3.680e+18,Add two value embeddings,Architecture,exact
+10,2025-09-11,24.07,201,2983.2,3.598e+18,Second input embedding (X0.1 init),Architecture,exact
+11,2025-09-14,23.45,201,,,PyTorch 2.7→2.10 upgrade,Systems,est
+12,2025-09-16,23.28,201,2957.0,3.566e+18,Snoo optimizer (outer optimizer around Adam and Muon),Optimizer,exact
+13,2025-09-17,23.14,201,2941.3,3.547e+18,EMA wrapper (update smoothing) on Muon,Optimizer,exact
+14,2025-09-30,23.08,201,2930.8,3.535e+18,Combine Snoo + EMA update smoothing,Optimizer,exact
+15,2025-10-04,23.03,201,2909.8,3.509e+18,Backout skip from 2/3 point to pre-lm_head,Architecture,exact
+16,2025-11-02,22.99,201,2901.9,3.500e+18,Smear + multi-token prediction,Architecture,exact
+17,2025-11-12,22.98,201,3124.8,3.769e+18,Remove redundant block mask operation,Systems,exact
+18,2025-12-31,17.35,201,2177.1,2.626e+18,"Bulk transfer of short-track features (batch schedule, NorMuon, Cautious WD, MTP, etc.)",Architecture,exact
