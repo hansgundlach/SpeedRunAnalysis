@@ -7,11 +7,13 @@
 - **record_num** — sequential record index (1–74)
 - **date** — date the record was set
 - **record_time_min** — wall-clock training time in minutes (from the README table)
-- **training_tokens_M** — total training tokens in millions, **only for log-backed records**
-- **training_flops** — estimated training FLOPs, **only for log-backed records**
+- **training_tokens_M** — total training tokens in millions, filled wherever the repository contains enough log information to compute or reasonably resolve it
+- **total_params_M_est** — estimated total parameter count in millions, including embedding tables and other stored parameters
+- **flop_params_M_est** — estimated effective parameter count in millions used in the FLOPs approximation
+- **training_flops** — estimated training FLOPs derived from `training_tokens_M` and `flop_params_M_est`
 - **description** — brief description of the innovation
 - **innovation_label** — categorical label (see below)
-- **data_quality** — `exact` if derived from a log file, `est` if no log-backed token/FLOP value is provided
+- **data_quality** — `exact` if taken directly from a single resolved log, `est` if a small assumption was needed (for example selecting the winning run from a directory of logs or using a documented batch schedule)
 
 ---
 
@@ -21,19 +23,27 @@
 All sourced directly from the README table. These values are exact.
 
 ### Training tokens and FLOPs
-These required reading individual log files. Each log file contains the full Python training script followed by live training output. The relevant lines look like:
+These were extracted by reading the log links from the short-track table in `modded-nanogpt/README.md`. Each log contains the Python training script followed by live training output. The relevant lines look like:
 
 ```
 step:1393/1393 val_loss:3.2785 train_time:179527ms step_avg:129.81ms
 ```
 
-From this, `step:X/X` gives the total number of training steps. Combined with the tokens-per-step (batch size × sequence length), total tokens can be computed.
+From this, `step:X/X` gives the total number of training steps. Combined with the tokens-per-step implied by the logged batch configuration, total tokens can be computed.
 
-**Records with exact log data** (marked `exact`): records 1, 2, 4, 5, 8, 9, 11, 12, 14, 18, 19, 20, 21, 29, 34, 40, 46, 49, 53, 62, 74. For these, step counts were read directly from the final line of the log.
+Most rows are now populated. Only records **3** and **66** remain blank because the short-track README does not link a usable training log for those records (`none` for record 3, `-` for record 66).
 
-**All other records** (marked `est`): `training_tokens_M` and `training_flops` are intentionally left blank in `nanogpt_speedrun_records.csv`.
+Rows marked `exact` were resolved from a single log file with an explicit final step count and explicit batch configuration. Rows marked `est` still use repository-backed evidence, but require at least one small judgment call documented below.
 
-This avoids circularity when comparing runtime against compute: no token/FLOP value in the main CSV is inferred from runtime.
+### Parameter estimates
+The repository does not print a single canonical parameter-count number for every record, so parameter counts were estimated from the logged model definitions.
+
+Two different parameter estimates are now tracked:
+
+- **`total_params_M_est`**: total stored parameters, including embedding tables, value embeddings, bigram embeddings, gate banks, and other learned tensors
+- **`flop_params_M_est`**: the effective dense-parameter count used in the `6N × tokens` FLOPs approximation
+
+This distinction matters because several late records add very large embedding tables. Those increase model size substantially, but embedding lookups are not well-modeled by the standard `6N × tokens` dense-matmul approximation. So the FLOPs column uses `flop_params_M_est`, not `total_params_M_est`.
 
 ---
 
@@ -42,14 +52,14 @@ This avoids circularity when comparing runtime against compute: no token/FLOP va
 Training FLOPs are estimated as:
 
 ```
-FLOPs = 6 × N_params × total_tokens
+FLOPs = 6 × flop_params × total_tokens
 ```
 
 Where:
 - **6** accounts for the forward pass (~2N) plus the backward pass (~4N)
-- **N_params = 124,000,000** — a fixed estimate for the GPT-2 small-scale model throughout the entire speedrun
+- **flop_params** is the per-record value in `flop_params_M_est`
 
-This is a standard approximation from the scaling laws literature (Chinchilla, etc.) and ignores attention FLOPs (which are small relative to matmul FLOPs for moderate sequence lengths) and embedding layers (which aren't counted in N here).
+This is still the standard scaling-laws approximation and still ignores explicit attention FLOPs. It also intentionally does **not** charge raw embedding-table size one-for-one as dense FLOPs.
 
 ---
 
@@ -57,7 +67,7 @@ This is a standard approximation from the scaling laws literature (Chinchilla, e
 
 The tokens-per-step changed significantly over the course of the speedrun. Four distinct eras were identified by reading representative log files.
 
-These era notes are retained as historical context and are **not** used to fill missing compute values in `nanogpt_speedrun_records.csv`.
+These era notes are retained as historical context. In a few `est` rows they also serve as a cross-check that the resolved tokens-per-step are consistent with neighboring records.
 
 ### Era 1: Records 1–11 (May–Nov 2024)
 - Sequence length: **1,024 tokens**
@@ -103,17 +113,38 @@ Records with multiple innovations were assigned the category of the primary cont
 
 ## Known Inaccuracies and Limitations
 
-### Fixed N_params assumption
-The model architecture changed significantly across 74 records. Parameter count was not extracted from logs and is held constant at 124M throughout. In reality:
-- Early records used a simpler architecture closer to GPT-2 small (~117–124M)
-- Later records added value embeddings, bigram hash embeddings, and other components that likely push the parameter count up somewhat (rough estimate: 130–145M by the end)
-- Using N=124M throughout means FLOPs are slightly understated for later records
+### Assumptions used for `est` rows
+- **Directory log links**: some README entries point to a directory rather than a single file (for example records 14-17). In those cases, the filled value comes from the successful run in that directory whose final logged runtime best matches the README record time while also hitting the target loss.
+- **Batch schedule averaging**: for late-era runs with `train_bs_schedule`, the token count uses the documented schedule as implemented in the logged script. This is close to, but not always identical to, using a single fixed average tokens-per-step value.
+- **Era/regime carry-forward**: for some systems-only records, the logged code indicates the same batch regime as adjacent records. Those rows are marked `est` even when the resulting token count is very likely exact, because the fill relies on that continuity check rather than a fresh hand-audit of every per-step detail.
+- **Architecture-family parameter mapping**: parameter counts were estimated from representative logged model definitions and then carried across records until the next architecture-changing record. This affects both `total_params_M_est` and `flop_params_M_est`.
+- **Missing logs**: records 3 and 66 remain blank because the repository does not currently provide a usable linked log for them.
 
-### Batch size schedule averaging
-For Era 4 records with a 3-stage batch size schedule, the 262,144 tokens/step figure is the exact arithmetic mean across equal-duration stages. In practice, the stage boundaries may not be exactly equal thirds of total steps, and the extension phase at the end of training uses the largest batch. The actual mean may be slightly higher than 262,144 for records near the end of the speedrun.
+### Architecture-family parameter map
+The following family-level estimates were used:
+
+| Records | Total params (M) | FLOP params (M) | Notes |
+|---|---:|---:|---|
+| 1-7 | 123.6 | 123.6 | GPT-2-small-scale tied-head regime |
+| 8-13 | 162.2 | 123.6 | Untied embed/lm_head increases stored params, not dense FLOPs |
+| 14-16 | 394.0 | 123.6 | Large value-embedding tables |
+| 17-29 | 275.7 | 121.2 | One attention layer removed; 3 value-embedding tables |
+| 30-34 | 271.0 | 116.5 | First MLP layer removed |
+| 35-48 | 268.7 | 114.1 | First attention layer also removed |
+| 49-61 | 268.7 | 114.1 | 11-layer regime with similar dense footprint |
+| 62 | 466.6 | 114.1 | Bigram hash embedding added |
+| 63-64 | 543.8 | 114.1 | Untied to 5 value-embedding tables |
+| 65-72 | 543.8 | 114.1 | Value embeddings fused into one parameter, same total size |
+| 73-74 | 543.8 | 114.1 | Partitioned Hyperconnections add only negligible extra scalars |
+
+### Batch size schedule approximation
+For Era 4 records with a 3-stage batch size schedule, the average tokens-per-step is close to 262,144, but the exact mean depends on the precise schedule boundaries and extension phase. The filled values are therefore more accurate than a pure era-average, but still inherit small ambiguity from how the schedule is summarized at the dataset level.
+
+### Total params versus FLOP params
+The biggest source of parameter-count variation is embedding-heavy changes: untied embeddings, value embeddings, and bigram embeddings. These can change total model size by hundreds of millions of parameters while changing dense training FLOPs much less. The dataset therefore reports both quantities separately.
 
 ### Missing compute on non-logged records
-For records without a usable log in this repository, `training_tokens_M` and `training_flops` are blank by design.
+For records without a usable linked log in this repository, `training_tokens_M` and `training_flops` are blank by design. At the moment this applies to records 3 and 66.
 
 If you need a fully populated (inferred) compute series for separate exploratory work, see `nanogpt_s_inferred_records.csv` in this directory.
 

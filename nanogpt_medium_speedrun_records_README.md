@@ -7,6 +7,8 @@
 - **record_num** — sequential record index (1–18)
 - **date** — date the record was set
 - **record_time_min** — wall-clock training time in minutes (from the README table)
+- **total_params_M_est** — estimated total parameter count in millions, including embedding tables and other stored parameters
+- **flop_params_M_est** — estimated effective parameter count in millions used in the FLOPs approximation
 - **training_tokens_M** — total training tokens in millions (only when uncertainty is <=10%)
 - **training_flops** — total training FLOPs (only when uncertainty is <=10%)
 - **description** — brief description of the innovation
@@ -33,36 +35,30 @@ Found by searching each log file for `batch_size`, `seq_len`, `train_bs_schedule
 ## FLOPs Calculation
 
 ```
-training_flops = 6 × model_params_M × 1e6 × training_tokens_M × 1e6
+training_flops = 6 × flop_params_M_est × 1e6 × training_tokens_M × 1e6
 ```
 
 Where:
 - **6** accounts for forward (~2N) + backward (~4N) passes
-- **model_params_M** is taken from the `model_params_M` column — **350** for record 1, **201** for records 2–18
+- **flop_params_M_est** is the per-record effective parameter count used for the dense-matmul approximation
 
-### Critical caveat: the speedrun model is NOT 350M parameters
+### Critical caveat: the speedrun model is neither 350M nor 201M in total size
 
-"Track 2" is called the "GPT-2 Medium" track because its **performance target** (≤2.92 val loss) matches what Andrej Karpathy's 350M-parameter llm.c baseline achieves. The actual speedrun model architecture is not the same as GPT-2 Medium. All log files (records 2–18) instantiate the model as:
+"Track 2" is called the "GPT-2 Medium" track because its **performance target** (≤2.92 val loss) matches what Andrej Karpathy's 350M-parameter llm.c baseline achieves. The actual speedrun model architecture is different throughout the track.
 
-```python
-GPT(vocab_size=50257, num_layers=16, num_heads=8, head_dim=128, model_dim=1024)
-```
+The early medium records do use a **16-layer, 1024-dim** backbone, but they also include substantial embedding-side parameters:
+- untied `lm_head`
+- multiple value-embedding tables
+- later, a second input embedding
+- later still, more value embeddings and additional small learned tensors
 
-This is **16 layers** with model_dim=1024, versus GPT-2 Medium's **24 layers** with the same 1024 dim. The non-embedding parameter count for the speedrun model is approximately:
+So the old single-number estimate of `201M` was only a rough count of the 16-layer hidden stack, not the full model size.
 
-| Component | Params per layer | × 16 layers | Total |
-|---|---|---|---|
-| Attention (QKV + O) | ~4.2M | × 16 | ~67M |
-| MLP (two 1024×4096 matrices) | ~8.4M | × 16 | ~134M |
-| **Non-embedding total** | | | **~201M** |
+This file now tracks two parameter estimates:
+- **`total_params_M_est`**: total stored parameters, including embeddings and other learned tensors
+- **`flop_params_M_est`**: the effective parameter count used in the `6N × tokens` FLOPs approximation
 
-This means a FLOPs estimate using 350M would overstate actual compute by roughly **1.74×** for the speedrun records.
-
-The CSV handles this with a per-record `model_params_M` column:
-- **Record 1** uses `model_params_M = 350` (the genuine llm.c 350M-parameter model)
-- **Records 2–18** use `model_params_M = 201` (the actual speedrun architecture)
-
-`training_flops` is computed as `6 × model_params_M × 1e6 × training_tokens_M × 1e6` in each row, so no correction factor is needed when reading the CSV. The two records are not directly FLOPs-comparable because they use different architectures; the `model_params_M` column makes this explicit.
+This distinction matters because embedding-heavy changes can increase model size substantially without increasing dense training FLOPs by the same factor.
 
 ### Compute-quality gating used in this file
 
@@ -139,11 +135,24 @@ Same taxonomy as the small track:
 
 ## Known Inaccuracies and Limitations
 
-### N_params differs between record 1 and records 2–18
-Record 1 (llm.c baseline) genuinely uses a ~350M parameter model. Records 2–18 use the speedrun architecture with ~201M non-embedding parameters. The `model_params_M` column in the CSV encodes this directly. For rows with populated compute fields, `training_flops` is computed per-row using that value.
+### Architecture-family parameter map
+The medium-track records fall into a few clear model families:
+
+| Records | Total params (M) | FLOP params (M) | Notes |
+|---|---:|---:|---|
+| 1 | 350.0 | 350.0 | Genuine llm.c GPT-2 Medium baseline |
+| 2-8 | 454.5 | 248.6 | 16-layer medium backbone, 1 dropped attention layer, 3 value-embedding tables, untied head |
+| 9 | 557.4 | 248.6 | Adds two more value-embedding tables |
+| 10-17 | 608.9 | 248.6 | Adds a second input embedding; later records mostly preserve this parameter footprint |
+| 18 | 613.4 | 252.8 | Bulk small-track transfer restores the missing attention layer and keeps the expanded embedding stack |
+
+The main reason total parameter count is so much larger than the old `201M` estimate is that the medium speedrun architecture is embedding-heavy. The main reason `flop_params_M_est` stays much smaller than `total_params_M_est` is that raw embedding-table size is not charged one-for-one in the standard `6N × tokens` dense-matmul approximation.
 
 ### llm.c baseline token count (record 1)
 The llm.c medium log is in the old `s:X tel:X` format and does not contain enough metadata to lock batch size with high confidence. Because that can create >10% compute uncertainty, record 1 compute fields are intentionally left blank.
+
+### The old `201M` estimate was too low as a general model-size figure
+The prior CSV treated most speedrun rows as `201M`, but the logs show that this omitted untied heads and large embedding-side additions. It was therefore not a good estimate of total model size, and it also understated dense FLOPs for the 16-layer medium backbone by excluding the output head.
 
 ### Record 7 step count uncertainty
 The log file for record 7 has `num_iterations = 6450` in the config dataclass, but the final `step:X/X` line in the training output reads `6350/6350`. The training output may have been truncated before the final step, or the step count was overridden at launch via a command-line argument. The CSV uses 6,350 (from the log output). If the actual run completed all 6,450 steps, the token count would be ~1.5% higher (~3,382M instead of 3,329M).

@@ -1,12 +1,11 @@
 # Measuring the Dark Energy of AI Progress
 
-
 ![Graph of NanoGPT progress over time as a fraction of initial training time at the small and medium scale competition tracks.](figures/training_time_log.png)
 *Graph of NanoGPT progress over time as a fraction of initial training time at the small and medium scale competition tracks.*
 
 ## Acknowledgements
 
-Thanks to Tom Cunningham for inspiring this post. I also want to acknowledge Parker Whitfill's work on NanoGPT and commentary on training-cost progress, and Anson Ho's recent post on this subject, which prompted these discussions. Zachary Brown provided helpful commentary on this manuscript.
+Thanks to Tom Cunningham for questions for inspiring this post. I also want to acknowledge Parker Whitfill's work on NanoGPT and FLOP vs non-FLOP progress, and Anson Ho's and Steven Byrnes's posts on this subject, which prompted these discussions. Zachary Brown provided helpful commentary on this manuscript.
 
 ## Main Conclusions
 
@@ -23,9 +22,9 @@ While this benchmark does not capture scale-dependent effects and suffers from b
 
 ## The NanoGPT Speedrun
 
-The NanoGPT speedrun benchmark is a collaborative and competitive project aimed at reaching GPT-2 Small validation loss on the FineWebText dataset using **8× H100s** as fast as possible. Contributors make updates to the architecture or training procedure, and entries that improve efficiency are considered world record holders.
+The NanoGPT speedrun benchmark is a collaborative and competitive project aimed at reaching a fixed FineWeb validation-loss target (3.28 cross-entropy) corresponding to Karpathy's GPT-2-small-style llm.c baseline using **8× H100s** as fast as possible. Contributors make updates to the architecture or training procedure, and entries that improve efficiency are considered world record holders.
 
-Entries are required to have active parameter counts of around **124M** (with some minor variation), the same order of magnitude as GPT-2 Small. The competition also runs a medium version where most entries use **200M-parameter** models (the first entry is 350M parameters). The benchmark has existed since 2024, and the architecture, time, and training curves for every record-setting model are recorded—providing a remarkable chart of algorithmic progress.
+Entries in the main track must use ≤**124M** active parameters per token (with some minor variation), the same order of magnitude as GPT-2 Small. The competition also runs a medium version anchored to Karpathy's 350M-parameter llm.c baseline. The benchmark has existed since 2024, and the architecture, time, and training curves for every record-setting model are recorded—providing a remarkable chart of algorithmic progress.
 
 Here I set out to see what this data can tell us about the nature of this progress.
 
@@ -33,7 +32,7 @@ Here I set out to see what this data can tell us about the nature of this progre
 
 For each entry in the benchmark, I asked Claude to categorize each of the innovations mentioned in the entry's record log. Many log updates include multiple innovations—for example, “included flash attention and updated Muon.” I asked Claude to choose the **single most representative category** for each record holder, such as “Architecture,” “Optimizer,” and so on.
 
-This process is inherently subjective. I spot-checked the classifications against the logs and they seem fair, though borderline cases exist. The classifications are in the [GitHub repositor](https://github.com/hansgundlach/SpeedRunAnalysis/blob/main/nanogpt_speedrun_records.csv), and some record-holding entries likely made advances across multiple categories.
+This process is inherently subjective. I spot-checked the classifications against the logs, and they seem fair, though borderline cases exist. The classifications are in the [GitHub repository](https://github.com/hansgundlach/SpeedRunAnalysis/blob/main/nanogpt_speedrun_records.csv), and some record-holding entries likely made advances across multiple categories.
 
 Here, **“Architecture”** refers to general non-optimizer algorithmic gains such as changing activations, skip connections, and related design choices, rather than broad paradigm shifts like transformers versus diffusion models or recurrent language models.
 
@@ -44,14 +43,13 @@ I've included the breakdown for the medium benchmark in the appendix. Most of th
 ![Attribution of speedrun gains by innovation category using Claude. Factor is measured before 2026 to compare with innovations in the medium speedrun competition.](figures/cumulative_speedup_small.png)
 *Attribution of speedrun gains by innovation category using Claude. Factor is measured before 2026 to easily compare with innovations in the medium speedrun competition.*
 
-
 ## FLOPs vs. Wall-Clock Time
 
 A large part of the algorithmic progress literature measures progress at the FLOP, or operation, level. However, it is possible to reduce training time without reducing FLOPs—for example, by increasing GPU utilization or using lower-precision arithmetic. Ultimately, what we care about are metrics like **wall-clock time, energy, and cost**, rather than FLOPs alone.
 
 Does this mean the algorithmic progress literature has failed to capture real-world progress?
 
-Parker Whitfill has done some [initial work](https://x.com/whitfill_parker/status/2028515815268491592) suggesting that these non-FLOP improvements are substantial, but still smaller than FLOP improvements. I try to address this more directly by estimating the number of training tokens and training FLOPs used by NanoGPT record holders over time. Methodology and caveats are in the appendix, and more detailed data processing is available on the [GitHub](https://github.com/hansgundlach/SpeedRunAnalysis).
+Parker Whitfill has done some [initial work](https://x.com/whitfill_parker/status/2028515815268491592) suggesting that these non-FLOP improvements are substantial, but still smaller than FLOP improvements. I try to address this more directly by asking Claude+Codex to estimate the number of training tokens and training FLOPs used by NanoGPT record holders over time. Methodology and caveats are in the appendix, and more detailed data processing is available on the [GitHub](https://github.com/hansgundlach/SpeedRunAnalysis).
 
 Figure 3 suggests that **FLOP improvements track wall-clock improvements well**. Non-FLOP improvements seem to play a relatively minor role. Thanks to Tom Cunningham for raising this question.
 
@@ -59,12 +57,12 @@ Figure 3 suggests that **FLOP improvements track wall-clock improvements well**.
 *Wall-clock time and estimated training FLOPs and training tokens over time for NanoGPT speedrun record holders.*
 
 ![Wall-clock time vs. estimated FLOPs for GPT-2 Medium speedruns. The FLOP-to-wall-clock gap is larger, but FLOP improvements still look like a good proxy for training improvement.](figures/resource_usage_medium.png)
-*Wall-clock time vs. estimated FLOPs for GPT-2 Medium speedruns. The FLOP-to-wall-clock gap is larger, but FLOP improvements still look like a good proxy for training improvement. However, the baseline here is not llm.c implementation since the first record does not have FLOP or token information*
+*Wall-clock time vs. estimated FLOPs for GPT-2 Medium speedruns. The FLOP-to-wall-clock gap is larger, but FLOP improvements still look like a good proxy for training improvement. However, the baseline here is not the `llm.c` implementation, since the first record does not have FLOP or token information.*
 
 ![Changes due to FLOP reduction and software-efficiency gains over the benchmark lifetime. Almost all algorithmic gains are FLOP gains as measured by the speedrun.](figures/speedup_decomposition.png)
 *Changes due to FLOP reduction and software-efficiency gains over the benchmark lifetime. Almost all algorithmic gains are FLOP gains as measured by the speedrun.*
 
-Taking data from the benchmark as a whole (2024–2026), non-FLOP improvements account for only about a **1.17×** factor over the entire benchmark period, with the vast majority of wall-clock reduction coming from FLOP reductions.
+Taking data from the benchmark as a whole (2024–2026), non-FLOP improvements account for only about a **1.1×** factor over the entire benchmark period, with the vast majority of wall-clock reduction coming from FLOP reductions.
 
 However, the baseline `llm.c` system was built in 2024 with already highly optimized software—kernel fusion, flash attention, `torch.compile`, and so on. Perhaps non-FLOP improvements were historically very important, but by 2024 there was less room left for them.
 
@@ -72,15 +70,15 @@ To estimate the size of these earlier effects, we can compare the cost of traini
 
 - GPT-2 XL is estimated to have cost **~$43,000–$50,000** to train in 2019. [OpenGPT2](https://medium.com/@vanya_cohen/opengpt-2-we-replicated-gpt-2-because-you-can-too-45e34e6d36dc) [Karpathy](http://x.com/karpathy/status/2017703360393318587?s=20)
 - Karpathy replicated it for **$672** in 2024. [Karpathy](https://github.com/karpathy/llm.c/discussions/677)
-- Hardware price-per-FLOP improved by roughly **10×** over that period (see Appendix)
-- Karpathy's replication used roughly **6× fewer FLOPs**, due to FineWebText improvements and avoiding GPT-2's inefficient multi-epoch training (see data discussion).
-- Accounting for these two factors gives: **$50,000 ÷ 10 ÷ 6 ≈ $833**, versus the actual **$672**, leaving a gap of roughly **20–30%** attributable to non-FLOP gains or improvements in model FLOP utilization (MFU).
+- Hardware price-per-FLOP improved by roughly **10×** over that period (see Appendix).
+- Karpathy's replication used roughly **3× fewer FLOPs**, due to FineWeb-Edu data improvements and avoiding GPT-2's inefficient multi-epoch training (see data discussion).
+- Accounting for these two factors gives: **$50,000 ÷ 10 ÷ 3 ≈ $1666**, versus the actual **$672**, leaving a gap of roughly **2.25x** attributable to non-FLOP gains or improvements in model FLOP utilization (MFU).
 
-This seems broadly reasonable. MFU is bounded, and it is hard to identify many other comparable gains over that period. However, the underlying data is noisy: prices and epoch estimates could easily be off by a factor of four, so the residual could range from negligible to reasonably large.
+This seems broadly reasonable. MFU is bounded, and it is hard to identify many other comparable gains over that period. However, the underlying data is noisy: prices and epoch estimates could easily be off by a factor of four (see appendix), so the residual could range from negligible to reasonably large. 
 
 Then why are people investing so much in non-FLOP improvements like flash attention and better parallelism?
 
-Much of this class of improvement is **enabling** rather than directly cost-reducing. These methods make it possible to train much larger models that would otherwise be impractical. Data movement imposes a fundamental limit on the size of language models. Inference scaling is fundamentally limited by KV-cache size and GPU memory. And there are still major systems and utilization challenges in RL training.
+Much of this class of improvement is **enabling** rather than directly cost-reducing. These methods make it possible to train much larger models that would otherwise be impractical. Data movement imposes a [fundamental limit](https://arxiv.org/pdf/2411.01137) on the size of language models. Inference scaling is fundamentally limited by KV-cache size and GPU memory. And there are still major systems and utilization challenges in RL training.
 
 ## What Is the Rate of Algorithmic Progress at This Scale?
 
@@ -94,19 +92,19 @@ Our experiments predict a gain of **2.85×** over the 2019–2023 period, where 
 
 My guess is that some of this gap is explained by NanoGPT innovations not scaling to larger models, by over-optimization for the benchmark, and by the inherently high variance of algorithmic progress. But I also think it is likely that we are missing some innovations in that period.
 
-If we factor in **data progress**—that is, some amalgam of Chinchilla optimality, FineWebText, single-epoch training, and related effects—then total speedrun gains rise by around **10×**, from roughly **30×** total to around **300×** (using the GPT-2 Small multiplier). This implies a CAGR of around **2.2×**, which is closer to Ho et al.'s estimate of **2.8×** from [Algorithmic Progress in Language Models](https://arxiv.org/abs/2403.05812).
+If we factor in **data progress**—that is, some amalgam of Chinchilla optimality, FineWeb-Edu, single-epoch training, and related effects—then total speedrun gains rise by around **10×**, from roughly **30×** total to around **300×** (using the GPT-2 Small multiplier). This implies a CAGR of around **2.2×**, which is closer to Ho et al.'s estimate of **2.8×** from [Algorithmic Progress in Language Models](https://arxiv.org/abs/2403.05812) and might plausibly be higher if we had data progress measures from 2024 to 2026. 
 
 That said, this factor is hard to interpret cleanly. It looks scale-dependent and is mostly inferred from anecdotal information about GPT-2.
 
 ## The Influence of Data
 
-> “If algorithms are the dark energy, then data is the dark matter.”
+<!-- > “If algorithms are the dark energy, then data is the dark matter.” -->
 
 The NanoGPT speedruns hold data constant, so there is little we can conclude directly about the role of data progress. However, the GPT replication community and Andrej Karpathy's records provide a valuable source for estimating the contribution of data quality, though these estimates are much more uncertain given the large uncertainty around the original GPT-2 training setup.
 
-Karpathy claims that GPT-2 XL was trained on [**100B tokens**](https://x.com/karpathy/status/1795513568655487221) . [GPT-3](https://arxiv.org/pdf/2005.14165) used the same number of tokens across model scales, and given the limited information in the GPT-2 paper, I think it is plausible that GPT-2 did something similar.
+Karpathy claims that GPT-2 XL was trained on [**100B tokens**](https://x.com/karpathy/status/1795513568655487221). [GPT-3](https://arxiv.org/pdf/2005.14165) used the same number of tokens across model scales, and given the limited information in the GPT-2 paper, I think it is plausible that GPT-2 did something similar across scales.
 
-Karpathy is able to replicate GPT-2 XL's accuracy on HellaSwag with **fewer than 30B tokens** by training on FineWebText, suggesting an efficiency gain of roughly **3–4×**. His GPT-2 Small replication matches the same HellaSwag accuracy with [**fewer than 10B tokens**](https://github.com/karpathy/llm.c/discussions/481), suggesting a gain of around **10×** relative to the original WebText training. GPT-2 Small, however, was trained less Chinchilla-optimally.
+Karpathy is able to replicate GPT-2 XL's accuracy on HellaSwag with **fewer than 30B tokens** by training on FineWeb-Edu, suggesting an efficiency gain of roughly **3–4×**. His GPT-2 Small replication matches the same HellaSwag accuracy with [**fewer than 10B tokens**](https://github.com/karpathy/llm.c/discussions/481), suggesting a gain of around **10×** relative to the original WebText training. GPT-2 Small, however, was trained less Chinchilla-optimally.
 
 These results seem broadly aligned with training results from the FineWeb paper, where there appear to be multiple regimes: an initial regime where training-efficiency gains are large, a second phase where the savings become roughly a constant additive factor, and a third regime where gains expand again.
 
@@ -114,11 +112,11 @@ The effects of data seem highly nonlinear. In fact, data is one of the paradigma
 
 Still, this is not an entirely fair comparison. GPT-2 was trained for many epochs, while FineWeb replications generally use **single-epoch training**. Karpathy also trained Chinchilla-optimally, while GPT-2 likely did not. On a fair token-to-token efficiency basis, the gains would be much smaller.
 
-This updates me against an [“most progress is data progress”](https://www.beren.io/2025-08-02-Most-Algorithmic-Progress-is-Data-Progress/) view, and toward a view closer to: **it is not the data, but how you use it**. If OpenAI had scaled their dataset to the same size, avoided redundant multi-epoch training, and known the optimal dataset size, they might have trained GPT-2 much more efficiently without improving the underlying information density of the dataset itself. I suspect the gains in efficiency due to data at fixed data size would be around 2-4x over that period based on [this paper](https://arxiv.org/abs/2406.11794) and [FineWeb data](https://arxiv.org/pdf/2406.17557). 
+This updates me against a [“most progress is data progress”](https://www.beren.io/2025-08-02-Most-Algorithmic-Progress-is-Data-Progress/) view, and toward a view closer to: **it is not the data, but how you use it**. If OpenAI had scaled their dataset to the same size, avoided redundant multi-epoch training, and known the optimal dataset size, they might have trained GPT-2 much more efficiently without improving the underlying information density of the dataset itself. I suspect the gains in efficiency due to data quality at fixed data size would be around **2–4×** over that period based on [this paper](https://arxiv.org/abs/2406.11794) and [FineWeb data](https://arxiv.org/pdf/2406.17557).
 
-In our paper, we assume older models were trained in a Kaplan-style manner, but in reality they may have been trained much less efficiently. In this broader sense, **“data + usage of data”** progress looks large—around or larger **10×** at some scales.
+In our paper, we assume older models were trained in a Kaplan-style manner, but in reality they may have been trained much less efficiently. In this broader sense, **“data + usage of data”** progress looks large—around or larger than **10×** at some scales.
 
-An important caveat is that these efficiency gains are measured on **HellaSwag**, a specific benchmark. It may not be that FineWebText is generically better; it may simply be much closer to the distribution needed for HellaSwag in particular. As Steven Byrnes has [noted](https://www.lesswrong.com/posts/sGNFtWbXiLJg2hLzK/the-nature-of-llm-algorithmic-progress), the gap between completion-based metrics like perplexity or HellaSwag and other benchmark-specific measures of data quality could be substantial.
+An important caveat is that these efficiency gains are measured on **HellaSwag**, a specific benchmark. It may not be that FineWeb-Edu is generically better; it may simply be much closer to the distribution needed for HellaSwag in particular. As Steven Byrnes has [noted](https://www.lesswrong.com/posts/sGNFtWbXiLJg2hLzK/the-nature-of-llm-algorithmic-progress), the gap between completion-based metrics like perplexity or HellaSwag and other benchmark-specific measures of data quality could be substantial.
 
 I am therefore more sympathetic to “most progress is data progress” when looking at specialized benchmark performance, such as FrontierMath.
 
@@ -135,16 +133,16 @@ Algorithmic gains for the small and medium speedruns look remarkably similar. In
 
 Importantly, these may be what my colleague Zachary Brown calls **scale-specific effects**. These are not gains that steadily increase or decrease with size, but rather hacks that work only at a particular scale—for example, hyperparameter tuning tricks or specific learning-rate adjustments.
 
-Our study only measures changes that have **increasing scale-dependent effects**. This is partly a selection effect, because we chose improvements that were historically most important—those that were, in a sense, “Bitter Lesson–pilled.” Thanks to Anson Ho for pointing this out.
+Our study only measured changes that have **increasing or constant scale-dependent effects**. This is partly a selection effect, because we chose improvements that were historically most important—those that were, in a sense, “Bitter Lesson–pilled.” Thanks to Anson Ho for pointing this out.
 
 ![scaled_runs](figures/larg_scale_curves.png)
 *GPT-2 Large validation-loss training curves taken from the speedrun repository. Speedrun gains look similar at **124M parameters** and **1.5B parameters**, with slightly larger gains at small scales.*
 
-## The Future of NanoGPT and Algorithmic Progress:
+## The Future of NanoGPT and Algorithmic Progress
 
- NanoGPT progress will not continue indefinitely. Speedruns and other tightly constrained algorithmic tasks eventually hit limits ([rubic cubes](https://www.reddit.com/r/dataisbeautiful/comments/1r2cfid/oc_evolution_of_rubiks_cube_world_record_solve/), [matrix exponent](https://en.wikipedia.org/wiki/Computational_complexity_of_matrix_multiplication#/media/File:MatrixMultComplexity_svg.svg)). But progress has recently sped up, and it seems entirely possible that trainging FLOP and sample efficiency could improve by several more orders of magnitude before plateauing, certainly if larger architectural changes are allowed. The benchmark measures kernel warmup, data loading, which may become more important as the benchmark timeframes shortens. Therefore in the future, in order to generalize, it will be important to measure FLOPs and sample efficiency rather than time per se. 
+NanoGPT progress will not continue indefinitely. Speedruns and other tightly constrained algorithmic tasks eventually hit limits ([Rubik's cubes](https://www.reddit.com/r/dataisbeautiful/comments/1r2cfid/oc_evolution_of_rubiks_cube_world_record_solve/), [matrix exponentiation](https://en.wikipedia.org/wiki/Computational_complexity_of_matrix_multiplication#/media/File:MatrixMultComplexity_svg.svg)). But progress has recently sped up, and it seems entirely possible that training FLOP and sample efficiency could improve by several more orders of magnitude before plateauing, certainly if larger architectural changes are allowed. The benchmark measures kernel warmup and data loading, which may become more important as the benchmark time frames shorten. Therefore, in the future, in order to generalize, it will be important to measure FLOPs and sample efficiency rather than time per se.
 
-However, other mechanisms besides pretraining enhancement may become the dominant form of algorithmic progress. Inference scaling along with algorithmic inference progress offers a viable direction.  I worked on another paper measuring inference-side efficiency gains [here](https://arxiv.org/abs/2511.23455). I think measuring RL training efficiency, thinking/inference efficieny,  and organization efficiency at the level of socieity of agents will become more important metrics. Human history is more of a story of our organizational productivity changing rather than our biological learning ability and AI progress could follow a simliar trajectory. Nevertheless, understanding pretraining gains gives us some broader insights into AI innovation and these higher-level domains. 
+However, other mechanisms besides pretraining enhancement may become the dominant form of algorithmic progress. Inference scaling, along with algorithmic inference progress, offers a viable direction (see my other work on inference-side efficiency gains [here](https://arxiv.org/abs/2511.23455)). I think measuring RL training efficiency, thinking/inference efficiency, and organizational efficiency at the level of a society of agents will become more important metrics. Human history is more of a story of our organizational productivity changing than our biological learning ability, and AI progress may eventually follow suit. Nevertheless, understanding pretraining gains gives us some broader insights into AI innovation and these higher-level domains.
 
 For all its faults, NanoGPT provides an exciting view of innovation. Progress may be dominated by changes at the largest scales, but there are still remarkable lessons to be learned at the small scale.
 
@@ -152,15 +150,16 @@ For all its faults, NanoGPT provides an exciting view of innovation. Progress ma
 
 ### Hardware Price-Performance Progress
 
-A Cloud TPU v3 device delivered roughly 420 TFLOP/s
-([Google, 2019](https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus))
-at an on-demand rate of $8/hr
-([Google Cloud TPU pricing](https://cloud.google.com/tpu/pricing)) (also [Kapathy](https://x.com/karpathy/status/2017703360393318587?s=20)).
-An H100 delivers ~1,979 TFLOP/s
-([NVIDIA, 2023](https://www.nvidia.com/en-us/data-center/h100/))
-at ~$3.44/hr
-([Lambda, 2024](https://lambda.ai/pricing)).
-This implies a cost per peak FLOP improvement of approximately **11×** over the period from 2019 to 2024.
+A Cloud TPU v3 device delivered roughly 420 TFLOP/s  
+([Google, 2019](https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus))  
+at an on-demand rate of $8/hr  
+([Google Cloud TPU pricing](https://cloud.google.com/tpu/pricing)) (also [Karpathy](https://x.com/karpathy/status/2017703360393318587?s=20)).  
+An H100 delivers ~1,979 TFLOP/s  
+([NVIDIA, 2023](https://www.nvidia.com/en-us/data-center/h100/))  
+at ~$3.44/hr  
+([Lambda, 2024](https://lambda.ai/pricing)).  
+This implies a cost-per-peak-FLOP improvement of approximately **11×** over the period from 2019 to 2024.
+
 <!-- 
 ### Calculating GPT-2 Training Cost and Hardware Progress
 
@@ -168,8 +167,9 @@ In 2019, a TPU v3 pod hour cost roughly **$8** and could perform around **420 TF
 
 Adjusting by an H100's peak BF16 throughput relative to a TPU v3, we get a hardware price-per-FLOP improvement very close to **10×** over this period. -->
 
-###Compute Estimates for GPT-2
-This is a direct quote from Epoch's [model database](https://epoch.ai/data/ai-models): 
+### Compute Estimates for GPT-2
+
+This is a direct quote from Epoch's [model database](https://epoch.ai/data/ai-models):  
 "
 Estimating based on:
 
@@ -177,9 +177,9 @@ Estimating based on:
 
 A 40GB dataset is approximately **8 billion words**, or:
 
-\[
+$$
 \frac{1}{0.75} \times 8\text{B} = 10.66\text{B tokens}
-\]
+$$
 
 The number of epochs is not reported, but:
 
@@ -189,21 +189,15 @@ The number of epochs is not reported, but:
 **12 epochs** is the modal, most credible value.  
 The mean of the probability mass is probably around **20 epochs**, so calculating from that value:
 
-\[
+$$
 6 \times (40 \times 200\,\text{million} \times \frac{1}{0.75} \times 20) \times 1.5\,\text{billion parameters} = 1.92 \times 10^{21}
-\]
+$$
 
 WolframAlpha calculation:  
 <https://www.wolframalpha.com/input?i=6+FLOP+*+20+*+%2840+billion+%2F+5+*+%284%2F3%29%29+*+1.5+billion>
 "
 
-I use 10 epoch's in this article because it is close to Epoch's modal estimate and is the number [quoted by Karpathy](https://x.com/karpathy/status/1795513568655487221). Higher numbers like 20 lead to nonsensical estimates of non-FLOP progress i.e <1. I think it could reasonably be 3x greater or smaller. 
-
-
-
-
-
-
+I use **10 epochs** in this article because it is close to Epoch's modal estimate and is the number [quoted by Karpathy](https://x.com/karpathy/status/1795513568655487221). Higher numbers like 20 lead to nonsensical estimates of non-FLOP progress, i.e. **<1**. However, I think it could reasonably be **3×** greater or smaller given uncertainty around other parameters. 
 
 <!-- 
 ## References
@@ -233,18 +227,19 @@ This residual is consistent with MFU improvements of up to around **3×** over t
 **[Fig.]** Distribution of advancement factors in the medium speedrun. The vast majority of records improve on previous records by a modest factor. This reinforces my view of a “great algorithms” picture of efficiency progress. -->
 
 ### Medium Speedrun Advancement Structure
+
 ![med_analysis](figures/cumulative_speedup_medium.png)
 *Most of the gains in the medium speedrun competition cannot be precisely accounted for because of the details of that benchmark. However, the ratio of improvement factors seems to roughly reflect the ratio seen for the small speedrun in the main document.*
 
+### Distribution of Improvements
 
-### Distribution of Improvments
 ![speedup_histo](figures/speedup_histograms.png)
-*Distribution of advancement factors in the medium speedrun. The vast majority of records improve on previous records by a modest factor. This reinforces my view of a great algorithms view of efficiency progress.*
+*Distribution of advancement factors in the medium speedrun. The vast majority of records improve on previous records by a modest factor. This reinforces my view of a great-algorithms view of efficiency progress.*
 
-###  GitHub
+### GitHub
 
 More detailed information on the data processing and Claude's classification methodology is available at: **[https://github.com/hansgundlach/SpeedRunAnalysis](https://github.com/hansgundlach/SpeedRunAnalysis)**
 
+### Notes on Methodology
 
-###Notes on Methodology
-For any estimate dealing with years I subtract year 1 by year 2 i.e when estimating growh rates from 2019 to 2026, I take the (2026-2019=7)th root. You could also be inclusive of both years as well but its hard to do stuff at the month level and I had to make a choice.
+For any estimate dealing with years, I subtract year 1 from year 2; i.e., when estimating growth rates from 2019 to 2026, I take the **(2026 - 2019 = 7)**th root. You could also be inclusive of both years, but it's hard to do this at the month level, and I had to make a choice.

@@ -1,75 +1,75 @@
-record_num,date,record_time_min,training_tokens_M,training_flops,description,innovation_label,data_quality
-1,2024-05-28,45.0,10255.1,7.630e+18,llm.c baseline,Systems,exact
-2,2024-06-06,31.4,4999.6,3.720e+18,Tuned LR & rotary embeddings,Architecture,exact
-3,2024-10-04,24.9,,,Muon optimizer introduced,Optimizer,est
-4,2024-10-11,22.3,3250.6,2.418e+18,Muon improvements,Optimizer,exact
-5,2024-10-14,15.2,2673.9,1.989e+18,"Modern architecture (ReLU², QK-Norm, zero-init)",Architecture,exact
-6,2024-10-18,13.1,,,Distributed Muon overhead,Systems,est
-7,2024-10-18,12.0,,,PyTorch 2.5 upgrade,Systems,est
-8,2024-11-03,10.8,2400.2,1.786e+18,Untied embedding and head,Architecture,exact
-9,2024-11-06,8.2,1677.7,1.248e+18,"Value+embed skip connections, momentum warmup, logit softcap",Architecture,exact
-10,2024-11-08,7.8,,,BFloat16 activations,Systems,est
-11,2024-11-10,7.2,1572.9,1.170e+18,U-net skip connections & double LR,Architecture,exact
-12,2024-11-19,5.03,983.0,7.314e+17,FlexAttention (64K context),Architecture,exact
-13,2024-11-24,4.66,,,Attention window warmup,Architecture,est
-14,2024-12-04,4.41,802.2,5.968e+17,Value embeddings,Architecture,exact
-15,2024-12-08,3.95,,,"U-net pattern value embeddings, code optimizations",Architecture,est
-16,2024-12-10,3.80,,,"Split value embeddings, block sliding window",Architecture,est
-17,2024-12-17,3.57,,,"Sparsify value embeddings, improved rotary",Architecture,est
-18,2025-01-04,3.4,728.8,5.422e+17,Lower logit softcap (30→15),Hyperparameter,exact
-19,2025-01-13,3.142,731.4,5.441e+17,"FP8 head, offset logits, LR decay to 0.1",Systems,exact
-20,2025-01-16,2.992,730.3,5.434e+17,"Merged QKV, long-short attention, batched Muon",Architecture,exact
-21,2025-01-26,2.933,696.0,5.178e+17,Reduced batch size,Hyperparameter,exact
-22,2025-05-24,2.990,,,Faster gradient all-reduce,Systems,est
-23,2025-05-25,2.979,,,Overlap computation and gradient communication,Systems,est
-24,2025-05-30,2.966,,,Replace all_reduce with reduce_scatter,Systems,est
-25,2025-07-13,2.896,,,PyTorch 2.9 upgrade,Systems,est
-26,2025-07-13,2.863,,,"Align batch starts with EoS, increase cooldown",Architecture,est
-27,2025-07-18,2.817,,,Triton kernel for symmetric Muon matmul,Systems,est
-28,2025-08-23,2.812,,,Sparse attention gate,Architecture,est
-29,2025-09-03,2.731,656.7,4.886e+17,"Flash Attention 3, 2048 max_doc_len, window schedule update",Systems,exact
-30,2025-09-05,2.717,,,Drop first MLP layer,Architecture,est
-31,2025-09-10,2.656,,,YaRN integration during training and validation,Architecture,est
-32,2025-09-11,2.625,,,"Optimize distributed training, skip connection gating, BFloat16",Systems,est
-33,2025-09-15,2.565,,,"Async data loading, extend final attn window for val",Systems,est
-34,2025-09-18,2.547,646.8,4.812e+17,Smear token embeddings 1 position forward,Architecture,exact
-35,2025-09-21,2.527,,,"Drop first attn layer, extend long windows for val",Architecture,est
-36,2025-09-23,2.495,,,"MuonCustomSizing, shared reduce scatter",Optimizer,est
-37,2025-09-27,2.483,,,Cross entropy in BFloat16,Systems,est
-38,2025-09-29,2.476,,,Polar Express (Newton-Schulz replacement),Optimizer,est
-39,2025-09-30,2.447,,,"Adam params every other step, reduce batch size",Optimizer,est
-40,2025-10-04,2.358,610.8,4.544e+17,"Backout, hyperparameter tuning, optimize lambda",Hyperparameter,exact
-41,2025-10-24,2.345,,,NorMuon optimizer,Optimizer,est
-42,2025-10-27,2.313,,,Update NorMuon LR and step logic,Optimizer,est
-43,2025-11-10,2.284,,,Cautious Weight Decay with schedule,Optimizer,est
-44,2025-11-16,2.269,,,Backward hooks on Adam optimizer,Systems,est
-45,2025-11-18,2.248,,,"Refine skip architecture, update exponential decay init",Architecture,est
-46,2025-11-29,2.203,566.2,4.213e+17,Batch size schedule,Systems,exact
-47,2025-12-10,2.193,,,"Multiply attn lambda with weight, fix warmup",Architecture,est
-48,2025-12-11,2.170,,,"Speed up Muon, additional lambda, reshape matrices",Optimizer,est
-49,2025-12-14,2.146,534.8,3.979e+17,Partial Key Offset,Architecture,exact
-50,2025-12-18,2.128,,,Extend Cautious Weight Decay to Adam parameters,Optimizer,est
-51,2025-12-19,2.075,,,"Retie embed and lm_head, retune FP8 scales",Architecture,est
-52,2025-12-21,2.037,,,"Smooth scalars via beta increase, freeze scalars at transitions",Architecture,est
-53,2025-12-22,1.988,503.3,3.745e+17,"Multi-token prediction, untie embed/lm_head at 2/3 training",Architecture,exact
-54,2025-12-26,1.940,,,Asymmetric Logit Rescale,Architecture,est
-55,2025-12-29,1.918,,,Gates on value embeddings and skip connection,Architecture,est
-56,2025-12-31,1.894,,,"Compile Adam, increase Adam buffer precision, move gates",Systems,est
-57,2026-01-04,1.878,,,"BFloat16 weights, mixed precision Muon, interleave Adam/Muon",Optimizer,est
-58,2026-01-07,1.820,,,Paired Head Attention,Architecture,est
-59,2026-01-10,1.781,,,Fused Triton kernel for linear ReLU square MLP,Systems,est
-60,2026-01-16,1.765,,,Fused Triton kernel for softcapped MTP cross entropy,Systems,est
-61,2026-01-18,1.748,,,Unified optimizers and transposed LM head,Optimizer,est
-62,2026-01-19,1.655,419.4,3.121e+17,Bigram Hash Embedding,Architecture,exact
-63,2026-01-26,1.650,,,Untie Value Embeddings,Architecture,est
-64,2026-01-30,1.630,,,Tuned nonzero Attn V and O initialization,Architecture,est
-65,2026-01-30,1.613,,,Group Value Embeddings into single parameter,Architecture,est
-66,2026-01-31,1.595,,,PyTorch 2.10 upgrade,Systems,est
-67,2026-01-31,1.540,,,"Tune fused softcap kernels, fuse FP8 quantization in LM head",Systems,est
-68,2026-01-31,1.535,,,Move bigram hash computation to GPU,Systems,est
-69,2026-02-02,1.528,,,Kernel optimizations,Systems,est
-70,2026-02-03,1.521,,,Tune value embed layout and ve_gates,Architecture,est
-71,2026-02-06,1.516,,,"Sparse bigram gradient comms, optimized CPU loading",Systems,est
-72,2026-02-10,1.496,,,Increase minimum LR and add max_seq_len schedule,Hyperparameter,est
-73,2026-02-12,1.485,,,Partitioned Hyperconnections,Architecture,est
-74,2026-02-16,1.468,390.6,2.906e+17,"Flatten GPT forward, remove post-attn lambdas, add transpose kernels",Systems,exact
+record_num,date,record_time_min,training_tokens_M,total_params_M_est,flop_params_M_est,training_flops,description,innovation_label,data_quality
+1,2024-05-28,45.0,10255.1,123.6,123.6,7.605e+18,llm.c baseline,Systems,exact
+2,2024-06-06,31.4,4999.6,123.6,123.6,3.708e+18,Tuned LR & rotary embeddings,Architecture,exact
+3,2024-10-04,24.9,,123.6,123.6,,Muon optimizer introduced,Optimizer,est
+4,2024-10-11,22.3,3250.6,123.6,123.6,2.411e+18,Muon improvements,Optimizer,exact
+5,2024-10-14,15.2,2673.9,123.6,123.6,1.983e+18,"Modern architecture (ReLU², QK-Norm, zero-init)",Architecture,exact
+6,2024-10-18,13.1,2516.6,123.6,123.6,1.866e+18,Distributed Muon overhead,Systems,est
+7,2024-10-18,12.0,2306.9,123.6,123.6,1.711e+18,PyTorch 2.5 upgrade,Systems,est
+8,2024-11-03,10.8,2400.2,162.2,123.6,1.780e+18,Untied embedding and head,Architecture,exact
+9,2024-11-06,8.2,1677.7,162.2,123.6,1.244e+18,"Value+embed skip connections, momentum warmup, logit softcap",Architecture,exact
+10,2024-11-08,7.8,1625.3,162.2,123.6,1.205e+18,BFloat16 activations,Systems,est
+11,2024-11-10,7.2,1572.9,162.2,123.6,1.166e+18,U-net skip connections & double LR,Architecture,exact
+12,2024-11-19,5.03,983.0,162.2,123.6,7.290e+17,FlexAttention (64K context),Architecture,exact
+13,2024-11-24,4.66,917.5,162.2,123.6,6.804e+17,Attention window warmup,Architecture,est
+14,2024-12-04,4.41,802.2,394.0,123.6,5.949e+17,Value embeddings,Architecture,exact
+15,2024-12-08,3.95,802.2,394.0,123.6,5.949e+17,"U-net pattern value embeddings, code optimizations",Architecture,est
+16,2024-12-10,3.80,802.2,394.0,123.6,5.949e+17,"Split value embeddings, block sliding window",Architecture,est
+17,2024-12-17,3.57,802.2,275.7,121.2,5.834e+17,"Sparsify value embeddings, improved rotary",Architecture,est
+18,2025-01-04,3.4,728.8,275.7,121.2,5.300e+17,Lower logit softcap (30→15),Hyperparameter,exact
+19,2025-01-13,3.142,731.4,275.7,121.2,5.319e+17,"FP8 head, offset logits, LR decay to 0.1",Systems,exact
+20,2025-01-16,2.992,730.3,275.7,121.2,5.311e+17,"Merged QKV, long-short attention, batched Muon",Architecture,exact
+21,2025-01-26,2.933,696.0,275.7,121.2,5.061e+17,Reduced batch size,Hyperparameter,exact
+22,2025-05-24,2.990,696.0,275.7,121.2,5.061e+17,Faster gradient all-reduce,Systems,est
+23,2025-05-25,2.979,696.0,275.7,121.2,5.061e+17,Overlap computation and gradient communication,Systems,est
+24,2025-05-30,2.966,696.0,275.7,121.2,5.061e+17,Replace all_reduce with reduce_scatter,Systems,est
+25,2025-07-13,2.896,696.0,275.7,121.2,5.061e+17,PyTorch 2.9 upgrade,Systems,est
+26,2025-07-13,2.863,688.1,275.7,121.2,5.004e+17,"Align batch starts with EoS, increase cooldown",Architecture,est
+27,2025-07-18,2.817,680.3,275.7,121.2,4.947e+17,Triton kernel for symmetric Muon matmul,Systems,est
+28,2025-08-23,2.812,668.5,275.7,121.2,4.861e+17,Sparse attention gate,Architecture,est
+29,2025-09-03,2.731,656.7,275.7,121.2,4.776e+17,"Flash Attention 3, 2048 max_doc_len, window schedule update",Systems,exact
+30,2025-09-05,2.717,648.8,271.0,116.5,4.535e+17,Drop first MLP layer,Architecture,est
+31,2025-09-10,2.656,644.9,271.0,116.5,4.508e+17,YaRN integration during training and validation,Architecture,est
+32,2025-09-11,2.625,640.9,271.0,116.5,4.480e+17,"Optimize distributed training, skip connection gating, BFloat16",Systems,est
+33,2025-09-15,2.565,629.1,271.0,116.5,4.397e+17,"Async data loading, extend final attn window for val",Systems,est
+34,2025-09-18,2.547,646.8,271.0,116.5,4.521e+17,Smear token embeddings 1 position forward,Architecture,exact
+35,2025-09-21,2.527,640.9,268.7,114.1,4.388e+17,"Drop first attn layer, extend long windows for val",Architecture,est
+36,2025-09-23,2.495,633.1,268.7,114.1,4.334e+17,"MuonCustomSizing, shared reduce scatter",Optimizer,est
+37,2025-09-27,2.483,625.2,268.7,114.1,4.280e+17,Cross entropy in BFloat16,Systems,est
+38,2025-09-29,2.476,621.3,268.7,114.1,4.253e+17,Polar Express (Newton-Schulz replacement),Optimizer,est
+39,2025-09-30,2.447,613.4,268.7,114.1,4.199e+17,"Adam params every other step, reduce batch size",Optimizer,est
+40,2025-10-04,2.358,610.8,268.7,114.1,4.182e+17,"Backout, hyperparameter tuning, optimize lambda",Hyperparameter,exact
+41,2025-10-24,2.345,602.9,268.7,114.1,4.127e+17,NorMuon optimizer,Optimizer,est
+42,2025-10-27,2.313,592.4,268.7,114.1,4.056e+17,Update NorMuon LR and step logic,Optimizer,est
+43,2025-11-10,2.284,582.0,268.7,114.1,3.984e+17,Cautious Weight Decay with schedule,Optimizer,est
+44,2025-11-16,2.269,574.1,268.7,114.1,3.930e+17,Backward hooks on Adam optimizer,Systems,est
+45,2025-11-18,2.248,566.2,268.7,114.1,3.876e+17,"Refine skip architecture, update exponential decay init",Architecture,est
+46,2025-11-29,2.203,566.2,268.7,114.1,3.876e+17,Batch size schedule,Systems,exact
+47,2025-12-10,2.193,550.5,268.7,114.1,3.769e+17,"Multiply attn lambda with weight, fix warmup",Architecture,est
+48,2025-12-11,2.170,542.6,268.7,114.1,3.715e+17,"Speed up Muon, additional lambda, reshape matrices",Optimizer,est
+49,2025-12-14,2.146,534.8,268.7,114.1,3.661e+17,Partial Key Offset,Architecture,exact
+50,2025-12-18,2.128,526.9,268.7,114.1,3.607e+17,Extend Cautious Weight Decay to Adam parameters,Optimizer,est
+51,2025-12-19,2.075,516.4,268.7,114.1,3.535e+17,"Retie embed and lm_head, retune FP8 scales",Architecture,est
+52,2025-12-21,2.037,508.6,268.7,114.1,3.482e+17,"Smooth scalars via beta increase, freeze scalars at transitions",Architecture,est
+53,2025-12-22,1.988,503.3,268.7,114.1,3.446e+17,"Multi-token prediction, untie embed/lm_head at 2/3 training",Architecture,exact
+54,2025-12-26,1.940,490.2,268.7,114.1,3.356e+17,Asymmetric Logit Rescale,Architecture,est
+55,2025-12-29,1.918,482.3,268.7,114.1,3.302e+17,Gates on value embeddings and skip connection,Architecture,est
+56,2025-12-31,1.894,474.5,268.7,114.1,3.248e+17,"Compile Adam, increase Adam buffer precision, move gates",Systems,est
+57,2026-01-04,1.878,469.2,268.7,114.1,3.212e+17,"BFloat16 weights, mixed precision Muon, interleave Adam/Muon",Optimizer,est
+58,2026-01-07,1.820,456.1,268.7,114.1,3.122e+17,Paired Head Attention,Architecture,est
+59,2026-01-10,1.781,445.6,268.7,114.1,3.051e+17,Fused Triton kernel for linear ReLU square MLP,Systems,est
+60,2026-01-16,1.765,440.4,268.7,114.1,3.015e+17,Fused Triton kernel for softcapped MTP cross entropy,Systems,est
+61,2026-01-18,1.748,435.2,268.7,114.1,2.979e+17,Unified optimizers and transposed LM head,Optimizer,est
+62,2026-01-19,1.655,419.4,466.6,114.1,2.871e+17,Bigram Hash Embedding,Architecture,exact
+63,2026-01-26,1.650,414.2,543.8,114.1,2.836e+17,Untie Value Embeddings,Architecture,est
+64,2026-01-30,1.630,408.9,543.8,114.1,2.799e+17,Tuned nonzero Attn V and O initialization,Architecture,est
+65,2026-01-30,1.613,403.7,543.8,114.1,2.764e+17,Group Value Embeddings into single parameter,Architecture,est
+66,2026-01-31,1.595,,543.8,114.1,,PyTorch 2.10 upgrade,Systems,est
+67,2026-01-31,1.540,385.4,543.8,114.1,2.638e+17,"Tune fused softcap kernels, fuse FP8 quantization in LM head",Systems,est
+68,2026-01-31,1.535,382.7,543.8,114.1,2.620e+17,Move bigram hash computation to GPU,Systems,est
+69,2026-02-02,1.528,380.1,543.8,114.1,2.602e+17,Kernel optimizations,Systems,est
+70,2026-02-03,1.521,377.5,543.8,114.1,2.584e+17,Tune value embed layout and ve_gates,Architecture,est
+71,2026-02-06,1.516,374.9,543.8,114.1,2.567e+17,"Sparse bigram gradient comms, optimized CPU loading",Systems,est
+72,2026-02-10,1.496,369.6,543.8,114.1,2.530e+17,Increase minimum LR and add max_seq_len schedule,Hyperparameter,est
+73,2026-02-12,1.485,367.0,543.8,114.1,2.512e+17,Partitioned Hyperconnections,Architecture,est
+74,2026-02-16,1.468,390.6,543.8,114.1,2.674e+17,"Flatten GPT forward, remove post-attn lambdas, add transpose kernels",Systems,exact
