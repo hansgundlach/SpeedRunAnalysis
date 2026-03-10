@@ -160,12 +160,6 @@ at ~$3.44/hr
 ([Lambda, 2024](https://lambda.ai/pricing)).  
 This implies a cost-per-peak-FLOP improvement of approximately **11×** over the period from 2019 to 2024.
 
-<!-- 
-### Calculating GPT-2 Training Cost and Hardware Progress
-
-In 2019, a TPU v3 pod hour cost roughly **$8** and could perform around **420 TFLOP/s**. Karpathy used **8× H100s for 24 hours** to train GPT-2 XL for **$672**, implying a cost of roughly **$3.50 per GPU-hour**—fairly high, but reasonable for 2024. Current prices are approximately **$2–3 per H100-hour**.
-
-Adjusting by an H100's peak BF16 throughput relative to a TPU v3, we get a hardware price-per-FLOP improvement very close to **10×** over this period. -->
 
 ### Compute Estimates for GPT-2
 
@@ -199,32 +193,6 @@ WolframAlpha calculation:
 
 I use **10 epochs** in this article because it is close to Epoch's modal estimate and is the number [quoted by Karpathy](https://x.com/karpathy/status/1795513568655487221). Higher numbers like 20 lead to nonsensical estimates of non-FLOP progress, i.e. **<1**. However, I think it could reasonably be **3×** greater or smaller given uncertainty around other parameters. 
 
-<!-- 
-## References
-
-[1] [One Epoch Is All You Need](https://arxiv.org/abs/1906.06669)  
-[2] [Extracting Data From Large Language Models](https://www.usenix.org/system/files/sec21-carlini-extracting.pdf)
-
-It also appears the model was trained on **TPU v3** chips:  
-<https://huggingface.co/openai-community/gpt2>
-" -->
-
-<!-- 
-### Cost Decomposition: 2019 vs. 2024
-
-Starting from the estimated 2019 training cost of **$43,000–$50,000** for GPT-2 XL:
-
-- **Hardware:** ~10× price-per-FLOP improvement (TPU v3 → H100)
-- **FLOP reduction:** ~6× fewer FLOPs in Karpathy's replication (better data, no multi-epoch waste)
-- **Expected cost after these factors:** ~$50,000 ÷ 60 ≈ $833
-- **Actual cost:** $672
-- **Residual (software/MFU):** ~20–30%
-
-This residual is consistent with MFU improvements of up to around **3×** over the period. Note that the uncertainty on the input estimates is large—potentially around **4×** on both prices and epochs—so the residual could range from negligible to substantial.
-
-### SpeedRun Advancement Structure
-
-**[Fig.]** Distribution of advancement factors in the medium speedrun. The vast majority of records improve on previous records by a modest factor. This reinforces my view of a “great algorithms” picture of efficiency progress. -->
 
 ### Medium Speedrun Advancement Structure
 
